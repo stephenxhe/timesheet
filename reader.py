@@ -8,7 +8,7 @@ import os, time, datetime
 import win32gui
 
 # open files
-file_name = r".\files\timesheet_" + datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m') + ".csv"
+file_name = r".\files\timesheets\timesheet_" + datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m') + ".csv"
 try:
     log_file = open(file_name)
     # open file in append mode
