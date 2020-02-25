@@ -21,6 +21,13 @@ except IOError:
     log_file.flush()
 
 file_name = r".\files\employee_data.csv"
+try:
+    temp_file = open(file_name)
+    # open file in append mode
+    temp_file.close()
+except IOError:
+    print("create new employee data file")
+    temp_file = open(file_name, "w+")
 with open(file_name, newline='') as f:
     reader = csv.reader(f)
     directory = list(reader)
