@@ -17,7 +17,7 @@ try:
 except IOError:
     print("create new time tracking file")
     log_file = open(file_name, "w+")
-    log_file.write("Name,Date,Time,In/Out\n")
+    log_file.write("Name,Date,Time,In/Out,Total\n")
     log_file.flush()
 
 file_name = r".\files\employee_data.csv"
@@ -61,9 +61,10 @@ esc_detect.start()
 def update_employee_data():
     directory_file = open(file_name, "w+")
     for j in range(len(directory)):
-        directory_file.write("{0},{1},{2}\n".format(directory[j][0],
+        directory_file.write("{0},{1},{2},{3}\n".format(directory[j][0],
                                                 directory[j][1],
-                                                directory[j][2]))
+                                                directory[j][2],
+                                                directory[j][3]))
     directory_file.flush()
     directory_file.close()
 
@@ -88,18 +89,24 @@ def tap(ID):
     for i in range(len(directory)):
         if directory[i][0] == ID:
             directory[i][2] = 0 if int(directory[i][2]) == 1 else 1
+            time_in = directory[i][3]
+            directory[i][3] = time.time() if int(directory[i][2]) == 1 else "out"
     update_employee_data()
 
     _name = getName(ID)
     _date = datetime.datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d")
     _time = datetime.datetime.fromtimestamp(time.time()).strftime("%H:%M:%S")
     _stat = "Clock in" if getStatus(ID) == 1 else "Clock out"
+    if _stat == "Clock in":
+        _total = ""
+    else:
+        _total = 60*(time.time() - time_in)/3600
     print("{0} {1}\n".format(_name,_stat))
-    log_file.write("{0},{1},{2},{3}\n".format(_name,_date,_time,_stat))
+    log_file.write("{0},{1},{2},{3},{4}\n".format(_name,_date,_time,_stat,_total))
     log_file.flush()
 
 # clear console
-clear = lambda: os.system('cls') #on Windows System
+clear = lambda: os.system('cls') # on Windows System
 
 # modes
 def main():
@@ -119,12 +126,17 @@ def add():
     newID = input("Scan ID card: ")
     if findID(newID):
         print("Already registered to: {0}".format(getName(newID)))
+        time.sleep(5)
+        clear()
     else:
         _name = input("Name: ")
         directory_file = open(file_name, "a+")
         directory_file.write("{0},{1},{2}\n".format(newID,_name,0))
-    time.sleep(5)
-    clear()
+        directory_file.flush()
+        directory_file.close()
+        print("Script must restart")
+        time.sleep(5)
+        os._exit(1)
 
 def remove():
     remID = input("Scan card: ")
@@ -158,4 +170,5 @@ def menu():
     else:
         main()
     menu()
+
 menu()
