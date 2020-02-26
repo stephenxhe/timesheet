@@ -7,6 +7,10 @@ import csv
 import os, time, datetime
 import win32gui
 
+# clear console
+clear = lambda: os.system('cls') # on Windows System
+clear()
+
 # open files
 file_name = r".\files\timesheets\timesheet_" + datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m') + ".csv"
 try:
@@ -17,7 +21,7 @@ try:
 except IOError:
     print("create new time tracking file")
     log_file = open(file_name, "w+")
-    log_file.write("Name,Date,Time,In/Out,Total\n")
+    log_file.write("Name,Date,Time,In/Out,Total (hrs)\n")
     log_file.flush()
 
 file_name = r".\files\employee_data.csv"
@@ -100,13 +104,10 @@ def tap(ID):
     if _stat == "Clock in":
         _total = ""
     else:
-        _total = 60*(time.time() - time_in)/3600
+        _total = round((time.time() - time_in)/3600,3)
     print("{0} {1}\n".format(_name,_stat))
     log_file.write("{0},{1},{2},{3},{4}\n".format(_name,_date,_time,_stat,_total))
     log_file.flush()
-
-# clear console
-clear = lambda: os.system('cls') # on Windows System
 
 # modes
 def main():
