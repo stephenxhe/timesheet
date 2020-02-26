@@ -104,8 +104,8 @@ def tap(ID):
     if _stat == "Clock in":
         _total = ""
     else:
-        _total = round((time.time() - time_in)/3600,3)
-    print("{0} {1}\n".format(_name,_stat))
+        _total = round((time.time() - float(time_in))/3600,3)
+    print("{0} {1} at {2} {3}\n".format(_name,_stat,_time,_date))
     log_file.write("{0},{1},{2},{3},{4}\n".format(_name,_date,_time,_stat,_total))
     log_file.flush()
 
@@ -132,11 +132,11 @@ def add():
     else:
         _name = input("Name: ")
         directory_file = open(file_name, "a+")
-        directory_file.write("{0},{1},{2}\n".format(newID,_name,0))
+        directory_file.write("{0},{1},{2},{3}\n".format(newID,_name,0,"out"))
         directory_file.flush()
         directory_file.close()
         print("Script must restart")
-        time.sleep(5)
+        time.sleep(1)
         os._exit(1)
 
 def remove():
