@@ -12,27 +12,33 @@ clear = lambda: os.system('cls') # on Windows System
 clear()
 
 # open files
-file_name = r".\files\timesheets\timesheet_" + datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m') + ".csv"
+year = int(datetime.datetime.fromtimestamp(time.time()).strftime('%Y'))
+month = int(datetime.datetime.fromtimestamp(time.time()).strftime('%m'))
+day = int(datetime.datetime.fromtimestamp(time.time()).strftime('%d'))
+
+week = int(datetime.date(year, month, day).isocalendar()[1])
+
+timesheetFilePath = r".\files\timesheets\timesheet_" + datetime.datetime.fromtimestamp(time.time()).strftime('%Y') + "-" + str(week) + ".csv"
 try:
-    log_file = open(file_name)
+    log_file = open(timesheetFilePath)
     # open file in append mode
     log_file.close()
-    log_file = open(file_name,"a+")
+    log_file = open(timesheetFilePath,"a+")
 except IOError:
     print("create new time tracking file")
-    log_file = open(file_name, "w+")
+    log_file = open(timesheetFilePath, "w+")
     log_file.write("Name,Date,Time,In/Out,Total (hrs)\n")
     log_file.flush()
 
-file_name = r".\files\employee_data.csv"
+employeeFilePath = r".\files\employee_data.csv"
 try:
-    temp_file = open(file_name)
+    temp_file = open(employeeFilePath)
     # open file in append mode
     temp_file.close()
 except IOError:
     print("create new employee data file")
-    temp_file = open(file_name, "w+")
-with open(file_name, newline='') as f:
+    temp_file = open(employeeFilePath, "w+")
+with open(employeeFilePath, newline='') as f:
     reader = csv.reader(f)
     directory = list(reader)
     # print("read data")
@@ -63,7 +69,7 @@ esc_detect.start()
 
 # employee data management
 def update_employee_data():
-    directory_file = open(file_name, "w+")
+    directory_file = open(employeeFilePath, "w+")
     for j in range(len(directory)):
         directory_file.write("{0},{1},{2},{3}\n".format(directory[j][0],
                                                 directory[j][1],
@@ -131,7 +137,7 @@ def add():
         clear()
     else:
         _name = input("Name: ")
-        directory_file = open(file_name, "a+")
+        directory_file = open(employeeFilePath, "a+")
         directory_file.write("{0},{1},{2},{3}\n".format(newID,_name,0,"out"))
         directory_file.flush()
         directory_file.close()
@@ -157,8 +163,39 @@ def showUsers():
     input("\nPress any key to continue ...")
     clear()
 
+def generateTotals():
+    with open(timesheetFilePath, newline='') as f:
+        reader = csv.reader(f)
+        timesheet_data = list(reader)
+    with open(employeeFilePath, newline='') as f:
+        reader = csv.reader(f)
+        employee_data = list(reader)
+
+    num_employees = len(employee_data)
+
+    totalsFilePath = r".\files\timesheets\timesheet_" + datetime.datetime.fromtimestamp(time.time()).strftime('%Y') + "-" + str(week) + "_totals.csv"
+    totals_file = open(totalsFilePath, "w+")
+    for i in range(num_employees):
+        totals_file.write("{0},".format(employee_data[i][1]))
+    totals_file.write("\n")
+
+    for i in range(len(timesheet_data)):
+        if timesheet_data[i][3] == "Clock out":
+            for j in range(num_employees):
+                if employee_data[j][1] == timesheet_data[i][0]:
+                    totals_file.write("{0}".format(timesheet_data[i][4]))
+                else:
+                    totals_file.write(" ")
+                totals_file.write(",")
+            totals_file.write("\n")
+
+    print("Generated {0}".format(totalsFilePath))
+    time.sleep(2)
+    totals_file.flush()
+    clear()
+
 def menu():
-    print("\nAdd user\t- /add\nRemove user\t- /remove\nShow users\t- /list\nTap in/out\t- hit ENTER\n")
+    print("\nAdd user\t- /add\nRemove user\t- /remove\nShow users\t- /list\nGenerate totals\t- /totals\nTap in/out\t- hit ENTER\n")
     action = input("Action: ")
 
     clear()
@@ -168,6 +205,8 @@ def menu():
         remove()
     elif action =="/list":
         showUsers()
+    elif action == "/totals":
+        generateTotals()
     else:
         main()
     menu()
